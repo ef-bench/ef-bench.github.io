@@ -33,7 +33,13 @@ const S = {
 // ---------------------------------------------------------------- renderer, lights, cameras
 const canvas = $("canvas");
 const stage = $("stage");
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: STILL });
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: STILL }); }
+catch (e) {
+  $("loadTxt").textContent = "This browser has no WebGL, so the 3D viewer cannot start.";
+  document.querySelector("#loading .spin").style.display = "none";
+  throw e;
+}
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.AgXToneMapping;

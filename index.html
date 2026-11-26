@@ -9,6 +9,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6' fill='%23e8743b'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="media/teaser_poster.jpg" fetchpriority="high">
 <link rel="stylesheet" href="assets/css/page.css">
 <script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 </head>
@@ -38,7 +39,7 @@
     <p class="authors">Anonymous submission</p>
   </div>
   <figure class="hero-video">
-    <video id="teaser" muted loop playsinline autoplay preload="metadata" poster="media/teaser_poster.jpg" aria-label="One arm, then a grid of 4, 16 and all 252 arms, each doing the same pick-and-place task"></video>
+    <video id="teaser" muted loop playsinline preload="metadata" poster="media/teaser_poster.jpg" aria-label="One arm, then a grid of 4, 16 and all 252 arms, each doing the same pick-and-place task"></video>
     <figcaption>One arm. Then 4, 16, and the whole pool of 252. Every tile runs the same pick-and-place task in simulation.</figcaption>
   </figure>
 </header>
@@ -82,8 +83,8 @@
     <h2>The arm gallery</h2>
     <p class="lead">Real arms, variants of real arms, and generated arms, all in the same room. Filter, then click an arm.</p>
     <div class="turn">
-      <figure><video muted loop playsinline preload="none" data-src="media/turntable/real_1280.mp4" poster="media/turntable/real_poster.jpg" aria-label="A real arm turning on its base"></video><figcaption>A real arm</figcaption></figure>
-      <figure><video muted loop playsinline preload="none" data-src="media/turntable/gen_1280.mp4" poster="media/turntable/gen_poster.jpg" aria-label="A generated arm turning on its base"></video><figcaption>A generated arm</figcaption></figure>
+      <figure><video muted loop playsinline preload="none" data-src="media/turntable/real_1280.mp4" data-poster="media/turntable/real_poster.jpg" aria-label="A real arm turning on its base"></video><figcaption>A real arm</figcaption></figure>
+      <figure><video muted loop playsinline preload="none" data-src="media/turntable/gen_1280.mp4" data-poster="media/turntable/gen_poster.jpg" aria-label="A generated arm turning on its base"></video><figcaption>A generated arm</figcaption></figure>
     </div>
     <div class="filters" id="galFilters">
       <div class="chipset" data-key="kind" aria-label="Source">
@@ -102,7 +103,7 @@
 <section class="sec reveal" id="data">
   <div class="wrap">
     <h2>Data wall</h2>
-    <p class="lead">Sixteen arms, two tasks. These are the demonstrations the scripted programs collected, replayed in simulation.</p>
+    <p class="lead">Sixteen arms, two tasks, from real arms (Tier A), variants of real arms (Tier B) and generated arms (Tier C). These are the demonstrations the scripted programs collected, replayed in simulation.</p>
     <div class="filters">
       <div class="chipset one" id="wallTask" aria-label="Task"><button type="button" data-v="t1" class="on">Pick &amp; place</button><button type="button" data-v="t2">Open drawer</button></div>
       <div class="chipset one" id="wallCam" aria-label="Camera"><button type="button" data-v="tp3" class="on">Third person</button><button type="button" data-v="wrist">Wrist</button></div>
@@ -115,8 +116,12 @@
   <div class="wrap">
     <h2>Explore in 3D</h2>
     <p class="lead">Every arm in the pool, in the browser. Drag its joints, switch camera, or replay the episode it recorded.</p>
-    <div class="frame3d">
-      <iframe id="viewer" title="3D arm browser" data-src="arms/" loading="lazy" allow="fullscreen"></iframe>
+    <div class="frame3d" id="frame3d">
+      <iframe id="viewer" title="3D arm browser" data-src="arms/" allow="fullscreen" tabindex="-1"></iframe>
+      <button type="button" class="still3d" id="still3d" aria-label="Load the interactive 3D arm browser">
+        <img id="still3dImg" loading="lazy" src="media/gallery/rs00499_heavy_1024.jpg" width="1024" height="1024" alt="A generated arm in the task scene">
+        <span class="still3d-pill" id="still3dPill"><i class="spin" aria-hidden="true"></i><span id="still3dTxt">Loading the 3D viewer…</span></span>
+      </button>
     </div>
     <p class="note"><a href="arms/" target="_blank" rel="noopener">Open the 3D browser on its own page</a>. It runs on WebGL and loads one arm at a time.</p>
   </div>
@@ -125,11 +130,14 @@
 <section class="sec reveal" id="sims">
   <div class="wrap">
     <h2>Same episode, three simulators</h2>
-    <p class="lead">The same arm, the same camera and the same recorded episode, replayed in MuJoCo, Isaac Sim and Genesis.</p>
+    <p class="lead">One arm of each tier, the same camera and the same recorded episode, replayed in MuJoCo, Isaac Sim and Genesis.</p>
+    <div class="filters">
+      <div class="chipset one" id="simTab" role="group" aria-label="Arm tier"></div>
+    </div>
     <p class="swipe">Swipe sideways to see all three.</p>
     <figure class="xsim">
-      <video muted loop playsinline preload="none" data-src="media/xsim/panda_3sim.mp4" poster="media/xsim/panda_3sim_poster.jpg" aria-label="Three-panel replay in MuJoCo, Isaac Sim and Genesis"></video>
-      <figcaption>Left to right: MuJoCo 4.0.1 (Filament renderer), Isaac Sim 5.1 (path tracing), Genesis 1.4.5 (ray tracer). Each simulator is shown with its own renderer, so the looks differ.</figcaption>
+      <video muted loop playsinline preload="none" data-src="" data-poster="" aria-label="Three-panel replay in MuJoCo, Isaac Sim and Genesis"></video>
+      <figcaption id="simCap">Left to right: MuJoCo 4.0.1 (Filament renderer), Isaac Sim 5.1 (RTX path tracing), Genesis 1.4.5 (LuisaRender path tracing). Each simulator runs its own physics and draws with its own renderer, so the looks differ.</figcaption>
     </figure>
   </div>
 </section>

@@ -42,6 +42,15 @@ const teaser = $("#teaser");
 teaser.dataset.src = innerWidth >= 1000 && !(navigator.connection && navigator.connection.saveData) ? "media/teaser_1080.mp4" : "media/teaser_720.mp4";
 watchVideo(teaser);
 $$(".turn video, .xsim video").forEach(watchVideo);
+// posters of the videos below the fold load only when they are near the screen, so the hero poster gets the bandwidth first
+const pio = new IntersectionObserver((es) => es.forEach((e) => {
+  if (!e.isIntersecting) return;
+  pio.unobserve(e.target);
+  e.target.dataset.near = "1";
+  if (e.target.dataset.poster) e.target.poster = e.target.dataset.poster;
+}), { rootMargin: "1000px" });
+$$("video[data-poster]").forEach((v) => pio.observe(v));
+const lazyPoster = (v, url) => { if (v.dataset.near) { v.poster = url; return; } if (url) { v.dataset.poster = url; pio.observe(v); } else { delete v.dataset.poster; v.removeAttribute("poster"); } };
 
 // ---- sprites -------------------------------------------------------------------------------------------------------------------------
 initSprites({ manifest: "assets/sprites/sprites.json" }).catch((e) => console.warn(e));
@@ -63,9 +72,8 @@ $("#lbX").addEventListener("click", () => lb.close());
 lb.addEventListener("click", (e) => { if (e.target === lb) lb.close(); });
 lb.addEventListener("close", () => { const v = $("video", lb); if (v) v.pause(); $("#lbBody").innerHTML = ""; });
 function open3d(id) {
-  const f = $("#viewer");
-  f.src = "arms/?arm=" + encodeURIComponent(id);
   lb.close();
+  load3d(id);
   $("#browser").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
 }
 function dl(rows) { return "<dl>" + rows.filter((r) => r[1] != null && r[1] !== "").map((r) => `<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join("") + "</dl>"; }
@@ -86,12 +94,40 @@ function showClip(w, task) {
   lb.showModal();
 }
 
-// ---- 3D browser iframe loads when near ---------------------------------------------------------------------------------------------
-{
-  const f = $("#viewer");
-  const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { if (!f.src) f.src = f.dataset.src; io.disconnect(); } }, { rootMargin: "400px" });
-  io.observe(f);
+// ---- 3D browser: a Cycles still first, the viewer (three.js + GLB) loads behind it and fades in when ready -----------------------------------
+const box3d = $("#frame3d"), view3d = $("#viewer"), still3d = $("#still3dImg"), txt3d = $("#still3dTxt");
+let started3d = false, poll3d = 0;
+const hasGL = (() => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; } })();
+const slowNet = !!(navigator.connection && (navigator.connection.saveData || /(^|-)(2g|3g)$/.test(navigator.connection.effectiveType || "")));
+function note3d(t, busy) { txt3d.textContent = t; $("#still3dPill").classList.toggle("idle", !busy); }
+function load3d(id) {
+  if (!hasGL) { note3d("This browser has no WebGL, so the 3D viewer cannot start.", false); return; }
+  if (started3d && !id) return;
+  started3d = true;
+  clearInterval(poll3d);
+  box3d.classList.remove("ready");
+  if (id) { still3d.src = `media/gallery/${encodeURIComponent(id)}_1024.jpg`; still3d.alt = "The selected arm in the task scene"; }
+  note3d("Loading the 3D viewer…", true);
+  // still first: the viewer download starts only after the still is on screen (or after 2.5 s), so the two do not fight for a slow link
+  let go = false;
+  const start = () => {
+    if (go) return; go = true;
+    view3d.src = "arms/" + (id ? "?arm=" + encodeURIComponent(id) : "");
+    const t0 = performance.now();
+    poll3d = setInterval(() => {
+      let ok = false;
+      try { const v = view3d.contentWindow && view3d.contentWindow.__viewer; ok = !!(v && v.ready()); } catch (e) {}
+      if (ok) { clearInterval(poll3d); box3d.classList.add("ready"); view3d.removeAttribute("tabindex"); }
+      else if (performance.now() - t0 > 40000) { clearInterval(poll3d); note3d("The 3D viewer is slow to start. Click to try again, or open it on its own page below.", false); started3d = false; }
+    }, 150);
+  };
+  if (still3d.complete && still3d.naturalWidth) start();
+  else { still3d.addEventListener("load", start, { once: true }); still3d.addEventListener("error", start, { once: true }); setTimeout(start, 2500); }
 }
+$("#still3d").addEventListener("click", () => load3d());
+if (slowNet) note3d("Tap to explore this arm in 3D", false);
+else new IntersectionObserver((es, io) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); load3d(); } }, { rootMargin: "400px" }).observe(box3d);
+if (!hasGL) note3d("This browser has no WebGL, so the 3D viewer cannot start.", false);
 
 // ---- gallery -----------------------------------------------------------------------------------------------------------------------
 async function gallery() {
@@ -129,12 +165,12 @@ async function wall() {
   const src = (w) => `media/wall/${w.id}_${st.task}_${st.cam === "tp3" ? "tp3_640" : "wrist_640"}.mp4`;
   const poster = (w) => `media/wall/${w.id}_${st.task}_poster_640.jpg`;
   grid.innerHTML = D.arms.map((w) =>
-    `<button type="button" class="card" data-id="${w.id}"><video muted loop playsinline preload="none" aria-label="${esc(w.name)}"></video><div class="cap"><b>${esc(w.name)}</b><span>${esc(w.sub)} · ${w.dof} DoF</span></div></button>`).join("");
+    `<button type="button" class="card" data-id="${w.id}"><video muted loop playsinline preload="none" aria-label="${esc(w.name)}"></video><div class="cap"><b>${esc(w.name)}</b><span class="tier t${w.tier}">${esc(w.label)}</span><span>${w.dof} DoF · ${esc(w.grip)}</span></div></button>`).join("");
   const cards = $$(".card", grid);
   const apply = () => cards.forEach((c, i) => {
     const w = D.arms[i], v = $("video", c);
     v.dataset.src = src(w);
-    v.poster = st.cam === "tp3" ? poster(w) : "";
+    lazyPoster(v, st.cam === "tp3" ? poster(w) : "");
     if (v.src) { v.src = v.dataset.src; if (!reduce) v.play().catch(() => {}); }
   });
   apply();
@@ -148,5 +184,29 @@ async function wall() {
   bind("#wallTask", "task"); bind("#wallCam", "cam");
 }
 
+// ---- cross-simulator tabs ---------------------------------------------------------------------------------------------------------------
+async function sims() {
+  const D = await (await fetch("data/xsim.json")).json();
+  const v = $(".xsim video"), bar = $("#simTab"), cap = $("#simCap");
+  const T = { A: "Tier A · real arm", B: "Tier B · variant", C: "Tier C · generated" };
+  const tabs = D.tabs.filter((t) => t.task === "t1");
+  const t2 = D.tabs.find((t) => t.task === "t2");
+  bar.innerHTML = tabs.map((t) => `<button type="button" data-k="${t.key}"${t.default ? ' class="on"' : ""}>${T[t.tier]}</button>`).join("");
+  const show = (t) => {
+    const tier = T[t.tier];
+    v.dataset.src = t.src; v.dataset.poster = t.poster; v.poster = t.poster;
+    if (v.src) { v.src = t.src; if (!reduce) v.play().catch(() => {}); }
+    v.setAttribute("aria-label", `Three-panel replay of ${t.arm_name} in MuJoCo, Isaac Sim and Genesis`);
+    cap.innerHTML = `<b>${esc(t.arm_name)}</b> (${esc(tier)}, ${t.dof} DoF). Left to right: ${D.panels.map(esc).join(" · ")}. Each simulator runs its own physics and draws with its own renderer, so the looks differ.`;
+  };
+  show(tabs.find((t) => t.default) || tabs[0]);
+  bar.addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    $$("button", bar).forEach((x) => x.classList.toggle("on", x === b));
+    show(tabs.find((t) => t.key === b.dataset.k));
+  });
+}
+
 gallery().catch((e) => { console.warn(e); $("#galGrid").textContent = "The gallery could not be loaded."; });
+sims().catch((e) => console.warn(e));
 wall().catch((e) => { console.warn(e); $("#wallGrid").textContent = "The data wall could not be loaded."; });
