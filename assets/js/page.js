@@ -191,7 +191,7 @@ async function sims() {
   const T = { A: "Tier A · real arm", B: "Tier B · variant", C: "Tier C · generated" };
   const tabs = D.tabs.filter((t) => t.task === "t1");
   const t2 = D.tabs.find((t) => t.task === "t2");
-  bar.innerHTML = tabs.map((t) => `<button type="button" data-k="${t.key}"${t.default ? ' class="on"' : ""}>${T[t.tier]}</button>`).join("");
+  bar.innerHTML = tabs.map((t) => `<button type="button" data-k="${t.key}"${t.default ? ' class="on"' : ""} aria-label="${T[t.tier]}">Tier ${t.tier}</button>`).join("");
   const show = (t) => {
     const tier = T[t.tier];
     v.dataset.src = t.src; v.dataset.poster = t.poster; v.poster = t.poster;
