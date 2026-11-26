@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arm Browser</title>
+<meta name="description" content="Interactive 3D browser of the generated and real robot arms, with joint sliders and recorded task episodes.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6' fill='%23e8a33d'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" crossorigin>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script>if(self!==top)document.documentElement.classList.add("inframe")</script>
+<style>html.inframe .head{display:none}html.inframe .page{padding-top:10px}</style>
+</head>
+<body>
+<main class="page">
+  <header class="head" id="head">
+    <h1>Explore the arms</h1>
+    <p class="lede">Every arm below is in our pool: real arms, variants of real arms, and generated arms. Pick one, drag its joints, or replay the episode it recorded.</p>
+  </header>
+
+  <nav class="tabs glass" id="modeTabs" role="tablist" aria-label="Viewer mode">
+    <button role="tab" data-mode="browse" class="on">Browse</button>
+    <button role="tab" data-mode="family">Family</button>
+  </nav>
+
+  <section class="viewer" id="viewer">
+    <aside class="side" id="side">
+      <div class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4a6 6 0 1 0 3.9 10.6l4.7 4.7 1.4-1.4-4.7-4.7A6 6 0 0 0 10 4zm0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/></svg>
+        <input id="q" type="search" placeholder="Search arms" autocomplete="off" aria-label="Search arms">
+      </div>
+      <div class="chips" id="chips"></div>
+      <div class="count" id="count"></div>
+      <ul class="list" id="list" role="listbox" aria-label="Arms"></ul>
+    </aside>
+
+    <div class="stagewrap">
+      <div class="stage" id="stage">
+        <canvas id="canvas" aria-label="3D view of the selected arm in its task scene"></canvas>
+        <div class="ov top">
+          <div class="pill glass seg" id="camSeg" role="group" aria-label="Camera">
+            <button data-cam="orbit" class="on" title="Free orbit">Orbit</button>
+            <button data-cam="tp" title="The dataset's third-person camera">Dataset</button>
+            <button data-cam="wrist" title="The arm's wrist camera">Wrist</button>
+          </div>
+          <div class="pill glass seg" id="taskSeg" role="group" aria-label="Task">
+            <button data-t="t1" class="on">Pick &amp; place</button>
+            <button data-t="t2">Open drawer</button>
+          </div>
+          <button class="pill glass icon" id="resetView" title="Reset view" aria-label="Reset view">
+            <svg viewBox="0 0 24 24"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>
+          </button>
+        </div>
+        <div class="ov name" id="nameTag"><span id="nameTxt">—</span><span class="tag" id="tierTag"></span></div>
+        <div class="ov bottom">
+          <div class="pill glass player">
+            <button class="pbtn" id="playBtn" aria-label="Play">
+              <svg viewBox="0 0 24 24" class="ic-play"><path d="M8 5v14l11-7z"/></svg>
+              <svg viewBox="0 0 24 24" class="ic-pause"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+            </button>
+            <input type="range" id="scrub" min="0" max="1" step="0.001" value="0" aria-label="Episode time">
+            <span class="time" id="time">0.0 s</span>
+            <div class="seg mini" id="speedSeg" role="group" aria-label="Speed">
+              <button data-s="1" class="on">1×</button><button data-s="2">2×</button>
+            </div>
+          </div>
+          <div class="phase" id="phase"></div>
+        </div>
+        <div class="loading" id="loading"><div class="spin"></div><span id="loadTxt">Loading…</span></div>
+        <div class="hint" id="hint">Drag to orbit · scroll to zoom</div>
+      </div>
+
+      <div class="family glass" id="family" hidden>
+        <div class="fam-head">
+          <div>
+            <div class="fam-title" id="famTitle">—</div>
+            <div class="fam-sub" id="famSub"></div>
+          </div>
+          <button class="btn primary" id="genBtn">Generate another</button>
+        </div>
+        <div class="fam-strip" id="famStrip"></div>
+        <p class="fam-note">Every arm shown here is a real member of the pool, built by our generator from the parent shown first. The button picks the next one; nothing is synthesised in the browser.</p>
+      </div>
+    </div>
+
+    <aside class="panel" id="panel">
+      <div class="card spec">
+        <div class="spec-head">
+          <div class="arm-name" id="armName">—</div>
+          <span class="chip" id="tierChip">—</span>
+        </div>
+        <dl class="spec-grid" id="specGrid"></dl>
+        <p class="instr" id="instr"></p>
+      </div>
+      <div class="card joints">
+        <div class="block-title">Joints <span class="lbl" id="jhint">drag to pose</span></div>
+        <div id="joints"></div>
+        <div class="block-title grip-title">Gripper</div>
+        <div id="gripper"></div>
+      </div>
+    </aside>
+  </section>
+  <footer class="foot" id="foot">Meshes from the arms' public robot descriptions (licence per arm in the card). Generated arms are procedural.</footer>
+</main>
+<script type="module" src="main.js"></script>
+</body>
+</html>

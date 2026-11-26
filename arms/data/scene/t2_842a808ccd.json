@@ -1,0 +1,1 @@
+{"key":"t2_842a808ccd","task":"t2","bodies":[{"name":"world","parent":-1,"pos":null,"quat":null,"joints":[]},{"name":"cabinet","parent":0,"pos":null,"quat":null,"joints":[]},{"name":"drawer","parent":1,"pos":null,"quat":null,"joints":[{"name":"drawer_slide","type":"slide","qadr":0,"axis":[-1.0,0.0,0.0],"pos":[0.0,0.0,0.0],"range":[0.0,0.2],"qpos0":[0.0]}]}]}

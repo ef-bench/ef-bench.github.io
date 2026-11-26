@@ -1,0 +1,96 @@
+{
+ "frame": 64,
+ "fps": 12,
+ "sprites": {
+  "s01": {
+   "sheet": "s01_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  },
+  "s02": {
+   "sheet": "s02_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  },
+  "s03": {
+   "sheet": "s03_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  },
+  "s04": {
+   "sheet": "s04_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  },
+  "s05": {
+   "sheet": "s05_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  },
+  "s06": {
+   "sheet": "s06_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  },
+  "s07": {
+   "sheet": "s07_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  },
+  "s08": {
+   "sheet": "s08_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  },
+  "s09": {
+   "sheet": "s09_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  },
+  "s10": {
+   "sheet": "s10_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  },
+  "s11": {
+   "sheet": "s11_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  },
+  "s12": {
+   "sheet": "s12_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  },
+  "t01": {
+   "sheet": "t01_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  },
+  "t02": {
+   "sheet": "t02_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  },
+  "t03": {
+   "sheet": "t03_64.png",
+   "frames": 24,
+   "pingpong": true,
+   "still": 13
+  }
+ }
+}

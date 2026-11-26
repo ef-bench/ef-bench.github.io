@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Robots for a Fixed World</title>
+<meta name="description" content="We generate robot arms for a fixed world, certify which tasks each one can do, and collect demonstrations on all of them.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6' fill='%23e8743b'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/page.css">
+<script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<nav class="nav" aria-label="Sections">
+  <a href="#top" class="nav-home" aria-label="Top">●</a>
+  <a href="#pipeline">Pipeline</a><a href="#gallery">Arms</a><a href="#data">Data</a><a href="#browser">3D</a><a href="#sims">Simulators</a>
+  <button id="themeBtn" class="nav-theme" type="button" aria-label="Switch light and dark theme" title="Theme"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9c0-.5 0-.9-.1-1.3A6 6 0 0 1 13.3 3.1C12.9 3 12.5 3 12 3z"/></svg></button>
+</nav>
+
+<header class="hero" id="top">
+  <div class="hero-sprites" aria-hidden="true">
+    <canvas class="sprite" data-sprite="s01" data-size="192" style="--x:8%;--y:20%"></canvas>
+    <canvas class="sprite" data-sprite="s02" data-size="128" style="--x:21%;--y:9%"></canvas>
+    <canvas class="sprite hide-t" data-sprite="s05" data-size="128" style="--x:7%;--y:47%"></canvas>
+    <canvas class="sprite hide-t" data-sprite="s07" data-size="128" style="--x:8%;--y:68%"></canvas>
+    <canvas class="sprite hide-t" data-sprite="s03" data-size="128" style="--x:7%;--y:88%"></canvas>
+    <canvas class="sprite" data-sprite="s09" data-size="192" style="--x:92%;--y:20%"></canvas>
+    <canvas class="sprite" data-sprite="s04" data-size="128" style="--x:79%;--y:9%"></canvas>
+    <canvas class="sprite hide-t" data-sprite="s06" data-size="128" style="--x:93%;--y:47%"></canvas>
+    <canvas class="sprite hide-t" data-sprite="s08" data-size="128" style="--x:92%;--y:68%"></canvas>
+    <canvas class="sprite hide-t" data-sprite="s10" data-size="128" style="--x:93%;--y:88%"></canvas>
+  </div>
+  <div class="hero-text">
+    <h1>Robots for a Fixed World</h1>
+    <p class="claim"><span>Others generate worlds for a fixed robot.</span> <span class="hl">We generate robots for a fixed world.</span></p>
+    <p class="authors">Anonymous submission</p>
+  </div>
+  <figure class="hero-video">
+    <video id="teaser" muted loop playsinline autoplay preload="metadata" poster="media/teaser_poster.jpg" aria-label="One arm, then a grid of 4, 16 and all 252 arms, each doing the same pick-and-place task"></video>
+    <figcaption>One arm. Then 4, 16, and the whole pool of 252. Every tile runs the same pick-and-place task in simulation.</figcaption>
+  </figure>
+</header>
+
+<main>
+<section class="sec tldr reveal" id="tldr">
+  <div class="wrap">
+    <div class="stats">
+      <div><b>252</b><span>arms</span></div>
+      <div><b>109</b><span>generated</span></div>
+      <div><b>4–7</b><span>DoF</span></div>
+      <div><b>2</b><span>tasks</span></div>
+    </div>
+    <ol class="steps">
+      <li><b>Generate.</b> New arms with new kinematics, grippers and visual skins, built from a handful of real arm descriptions.</li>
+      <li><b>Certify.</b> A design-time filter checks every arm in five layers and records which task instances it can physically do.</li>
+      <li><b>Collect.</b> Scripted task programs collect demonstrations on every arm that passes.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="sec reveal" id="pipeline">
+  <div class="wrap">
+    <h2>From parts to demonstrations</h2>
+    <p class="lead">An arm is assembled from a kinematic chain, links, a skin and a gripper. Then it goes through the filter. Only arms that survive collect data.</p>
+    <div class="stages" id="stages">
+      <figure><img loading="lazy" src="media/stages/s1_512.jpg" srcset="media/stages/s1_512.jpg 1x, media/stages/s1_1024.jpg 2x" alt="Kinematic chain: rods between joints and joint axes"><figcaption><b>1</b> Chain</figcaption></figure>
+      <figure><img loading="lazy" src="media/stages/s2_512.jpg" srcset="media/stages/s2_512.jpg 1x, media/stages/s2_1024.jpg 2x" alt="Link shapes"><figcaption><b>2</b> Links</figcaption></figure>
+      <figure><img loading="lazy" src="media/stages/s3_512.jpg" srcset="media/stages/s3_512.jpg 1x, media/stages/s3_1024.jpg 2x" alt="Visual skin"><figcaption><b>3</b> Skin</figcaption></figure>
+      <figure><img loading="lazy" src="media/stages/s4_512.jpg" srcset="media/stages/s4_512.jpg 1x, media/stages/s4_1024.jpg 2x" alt="Gripper added"><figcaption><b>4</b> Gripper</figcaption></figure>
+      <figure><img loading="lazy" src="media/stages/s5_512.jpg" srcset="media/stages/s5_512.jpg 1x, media/stages/s5_1024.jpg 2x" alt="Arm in the task scene"><figcaption><b>5</b> Scene</figcaption></figure>
+    </div>
+    <p class="note">One generated arm, rendered at each stage.</p>
+    <div id="pipe" class="pipe-host"></div>
+    <p class="note">Schematic. The arms shown are illustrative, and the failure reasons name the kind of fault each layer catches.</p>
+  </div>
+</section>
+
+<section class="sec reveal" id="gallery">
+  <div class="wrap">
+    <h2>The arm gallery</h2>
+    <p class="lead">Real arms, variants of real arms, and generated arms, all in the same room. Filter, then click an arm.</p>
+    <div class="turn">
+      <figure><video muted loop playsinline preload="none" data-src="media/turntable/real_1280.mp4" poster="media/turntable/real_poster.jpg" aria-label="A real arm turning on its base"></video><figcaption>A real arm</figcaption></figure>
+      <figure><video muted loop playsinline preload="none" data-src="media/turntable/gen_1280.mp4" poster="media/turntable/gen_poster.jpg" aria-label="A generated arm turning on its base"></video><figcaption>A generated arm</figcaption></figure>
+    </div>
+    <div class="filters" id="galFilters">
+      <div class="chipset" data-key="kind" aria-label="Source">
+        <button type="button" data-v="real">Real</button><button type="button" data-v="variant">Variant</button><button type="button" data-v="generated">Generated</button>
+      </div>
+      <div class="chipset" data-key="dof" aria-label="Degrees of freedom">
+        <button type="button" data-v="4">4 DoF</button><button type="button" data-v="5">5 DoF</button><button type="button" data-v="6">6 DoF</button><button type="button" data-v="7">7 DoF</button>
+      </div>
+      <span class="count" id="galCount" aria-live="polite"></span>
+    </div>
+    <div class="grid gal" id="galGrid"></div>
+    <div class="more"><button type="button" id="galMore" class="btn">Show more</button></div>
+  </div>
+</section>
+
+<section class="sec reveal" id="data">
+  <div class="wrap">
+    <h2>Data wall</h2>
+    <p class="lead">Sixteen arms, two tasks. These are the demonstrations the scripted programs collected, replayed in simulation.</p>
+    <div class="filters">
+      <div class="chipset one" id="wallTask" aria-label="Task"><button type="button" data-v="t1" class="on">Pick &amp; place</button><button type="button" data-v="t2">Open drawer</button></div>
+      <div class="chipset one" id="wallCam" aria-label="Camera"><button type="button" data-v="tp3" class="on">Third person</button><button type="button" data-v="wrist">Wrist</button></div>
+    </div>
+    <div class="grid wall" id="wallGrid"></div>
+  </div>
+</section>
+
+<section class="sec reveal" id="browser">
+  <div class="wrap">
+    <h2>Explore in 3D</h2>
+    <p class="lead">Every arm in the pool, in the browser. Drag its joints, switch camera, or replay the episode it recorded.</p>
+    <div class="frame3d">
+      <iframe id="viewer" title="3D arm browser" data-src="arms/" loading="lazy" allow="fullscreen"></iframe>
+    </div>
+    <p class="note"><a href="arms/" target="_blank" rel="noopener">Open the 3D browser on its own page</a>. It runs on WebGL and loads one arm at a time.</p>
+  </div>
+</section>
+
+<section class="sec reveal" id="sims">
+  <div class="wrap">
+    <h2>Same episode, three simulators</h2>
+    <p class="lead">The same arm, the same camera and the same recorded episode, replayed in MuJoCo, Isaac Sim and Genesis.</p>
+    <p class="swipe">Swipe sideways to see all three.</p>
+    <figure class="xsim">
+      <video muted loop playsinline preload="none" data-src="media/xsim/panda_3sim.mp4" poster="media/xsim/panda_3sim_poster.jpg" aria-label="Three-panel replay in MuJoCo, Isaac Sim and Genesis"></video>
+      <figcaption>Left to right: MuJoCo 4.0.1 (Filament renderer), Isaac Sim 5.1 (path tracing), Genesis 1.4.5 (ray tracer). Each simulator is shown with its own renderer, so the looks differ.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="sec reveal" id="results">
+  <div class="wrap">
+    <h2>Results</h2>
+    <p class="lead">Coming soon.</p>
+    <div class="soon">
+      <div><b>Held-out arm</b><span>Train on one arm, or on the held-out arm itself, then test on the held-out arm.</span></div>
+      <div><b>Coverage</b><span>Generated arms against a pool made by scaling one template.</span></div>
+      <div><b>Filter vs. collection</b><span>Does the filter's prediction match what the collection achieved?</span></div>
+      <div><b>Limitations</b><span>What the filter cannot see and what the pool does not cover.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec reveal" id="bibtex">
+  <div class="wrap">
+    <h2>BibTeX</h2>
+    <p class="lead">Withheld for review.</p>
+  </div>
+</section>
+</main>
+
+<footer class="foot"><div class="wrap">Project page for anonymous review.</div></footer>
+
+<dialog id="lb" class="lb" aria-label="Arm details">
+  <button type="button" class="lb-x" id="lbX" aria-label="Close">×</button>
+  <div class="lb-body" id="lbBody"></div>
+</dialog>
+
+<script type="module" src="assets/js/page.js"></script>
+</body>
+</html>
