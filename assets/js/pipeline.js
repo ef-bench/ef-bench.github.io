@@ -16,12 +16,14 @@ const clamp01 = (x) => Math.max(0, Math.min(1, x));
 const ease = (x) => 1 - Math.pow(1 - clamp01(x), 3);
 const reduce = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+// why = a real first-failure reason per layer (filter runs 11-15..17, first failures L1 2, L2 5, L3 28, L4 0, L5 5).
+// L4 never failed on its own, so its reason comes from the deliberately broken control arms.
 const GATES = [
-  { id: "L1", name: "Kinematics", why: ["parallel axes"] },
-  { id: "L2", name: "Mount & home", why: ["self-collision", "at home"] },
-  { id: "L3", name: "Reach", why: ["links too short"] },
-  { id: "L4", name: "Actuators", why: ["heavy hand /", "weak motors"] },
-  { id: "L5", name: "Grasp in sim", why: ["weak grip"] },
+  { id: "L1", name: "Kinematics", why: ["duplicate", "joint axes"] },
+  { id: "L2", name: "Mount & home", why: ["self-collision"] },
+  { id: "L3", name: "Reach", why: ["targets out of", "reach (no IK)"] },
+  { id: "L4", name: "Actuators", why: ["motors too weak", "for payload"] },
+  { id: "L5", name: "Grasp in sim", why: ["slips at lift /", "fingers too high"] },
 ];
 // lane order: failing layer index (-1 = passes everything)
 const FAILS = [0, 1, -1, 2, 3, -1, 4, -1];
